@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 export interface ConfirmSubmitModalProps {
+  /** Shown only after form validation passes (Submit button is disabled until then). */
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;

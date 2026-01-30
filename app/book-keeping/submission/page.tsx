@@ -63,6 +63,10 @@ function validateAll(formData: BookKeepingFormData): Record<string, string> {
   return errors;
 }
 
+/** True when all required fields are filled and pass validation (used to disable Submit until valid). */
+function isFormValid(formData: BookKeepingFormData): boolean {
+  return Object.keys(validateAll(formData)).length === 0;
+}
 
 export default function BookKeepingSubmissionPage() {
   const [formData, setFormData] = useState<BookKeepingFormData>(INITIAL_FORM_DATA);
@@ -89,6 +93,7 @@ export default function BookKeepingSubmissionPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
+  // Required fields validated on blur (per field) and on submit (validateAll in handleSubmitClick).
   const handleBlur = useCallback(
     (field: keyof BookKeepingFormData) => {
       const msg = validateField(field, formData);
@@ -110,10 +115,12 @@ export default function BookKeepingSubmissionPage() {
     setStatus("draft");
   }, [formData]);
 
+  // Validation on submit: run validateAll, show errors or open confirmation modal only when validation passes.
   const handleSubmitClick = useCallback(() => {
     const allErrors = validateAll(formData);
     setErrors(allErrors);
-    if (Object.keys(allErrors).length === 0) {
+    const valid = Object.keys(allErrors).length === 0;
+    if (valid) {
       setModalOpen(true);
     } else {
       setTimeout(() => {
@@ -134,6 +141,7 @@ export default function BookKeepingSubmissionPage() {
   }, []);
 
   const readOnly = status === "submitted";
+  const submitDisabled = !isFormValid(formData);
 
   return (
     <div className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -191,7 +199,9 @@ export default function BookKeepingSubmissionPage() {
               <button
                 type="button"
                 onClick={handleSubmitClick}
-                className="rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                disabled={submitDisabled}
+                aria-disabled={submitDisabled}
+                className="rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{ backgroundColor: "#2563EB" }}
               >
                 Submit
@@ -202,6 +212,7 @@ export default function BookKeepingSubmissionPage() {
         </div>
       </div>
 
+      {/* Modal opens only when validation passes (no errors); Submit button is disabled until then. */}
       <ConfirmSubmitModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
