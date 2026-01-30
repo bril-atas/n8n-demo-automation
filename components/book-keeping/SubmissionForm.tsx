@@ -8,6 +8,7 @@ export interface SubmissionFormProps {
   formData: BookKeepingFormData;
   errors: Record<string, string>;
   onChange: (field: keyof BookKeepingFormData, value: string) => void;
+  /** All required fields are validated on blur for immediate user feedback when leaving each field (per ticket). */
   onBlur: (field: keyof BookKeepingFormData) => void;
   readOnly: boolean;
 }

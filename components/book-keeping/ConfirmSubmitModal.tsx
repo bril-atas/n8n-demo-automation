@@ -3,7 +3,11 @@
 import { useEffect } from "react";
 
 export interface ConfirmSubmitModalProps {
-  /** Shown only after form validation passes (Submit button is disabled until then). */
+  /**
+   * Confirmation modal displayed before submission.
+   * User must click "Confirm Submit" in this modal to complete the submission; submission does not occur until then.
+   * Shown only after form validation passes (Submit button is disabled until then).
+   */
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;

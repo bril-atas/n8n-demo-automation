@@ -68,6 +68,11 @@ function isFormValid(formData: BookKeepingFormData): boolean {
   return Object.keys(validateAll(formData)).length === 0;
 }
 
+/**
+ * Book Keeping Submission page.
+ * - Required fields are validated on blur (immediate feedback when leaving each field) and on submit.
+ * - Confirmation modal is displayed before submission: user must confirm in the modal to complete submission.
+ */
 export default function BookKeepingSubmissionPage() {
   const [formData, setFormData] = useState<BookKeepingFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -93,7 +98,7 @@ export default function BookKeepingSubmissionPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  // Required fields validated on blur (per field) and on submit (validateAll in handleSubmitClick).
+  // All required fields must be validated on blur (immediate user feedback when leaving each field) and on submit (validateAll).
   const handleBlur = useCallback(
     (field: keyof BookKeepingFormData) => {
       const msg = validateField(field, formData);
@@ -212,7 +217,7 @@ export default function BookKeepingSubmissionPage() {
         </div>
       </div>
 
-      {/* Modal opens only when validation passes (no errors); Submit button is disabled until then. */}
+      {/* Confirmation modal is displayed before submission: user must confirm in the modal to complete submission. Modal opens only when validation passes. */}
       <ConfirmSubmitModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
