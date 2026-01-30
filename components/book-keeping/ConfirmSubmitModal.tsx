@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export interface ConfirmSubmitModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +13,15 @@ export function ConfirmSubmitModal({
   onClose,
   onConfirm,
 }: ConfirmSubmitModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") e.preventDefault();
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -19,7 +30,6 @@ export function ConfirmSubmitModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-submit-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-zinc-900"

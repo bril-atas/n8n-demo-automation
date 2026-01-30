@@ -63,23 +63,6 @@ function validateAll(formData: BookKeepingFormData): Record<string, string> {
   return errors;
 }
 
-function isSubmitEnabled(
-  formData: BookKeepingFormData,
-  errors: Record<string, string>
-): boolean {
-  if (
-    !formData.book_name?.trim() ||
-    !formData.author?.trim() ||
-    !formData.book_date?.trim() ||
-    !formData.total_book?.trim()
-  )
-    return false;
-  const num = Number(formData.total_book);
-  if (Number.isNaN(num) || !Number.isInteger(num) || num < 1) return false;
-  if (formData.book_date > TODAY_ISO) return false;
-  if (Object.keys(errors).length > 0) return false;
-  return true;
-}
 
 export default function BookKeepingSubmissionPage() {
   const [formData, setFormData] = useState<BookKeepingFormData>(INITIAL_FORM_DATA);
@@ -130,7 +113,17 @@ export default function BookKeepingSubmissionPage() {
   const handleSubmitClick = useCallback(() => {
     const allErrors = validateAll(formData);
     setErrors(allErrors);
-    if (Object.keys(allErrors).length === 0) setModalOpen(true);
+    if (Object.keys(allErrors).length === 0) {
+      setModalOpen(true);
+    } else {
+      setTimeout(() => {
+        const firstErrorField = Object.keys(allErrors)[0];
+        document.getElementById(firstErrorField)?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 0);
+    }
   }, [formData]);
 
   const handleConfirmSubmit = useCallback(() => {
@@ -141,7 +134,6 @@ export default function BookKeepingSubmissionPage() {
   }, []);
 
   const readOnly = status === "submitted";
-  const submitEnabled = isSubmitEnabled(formData, errors);
 
   return (
     <div className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -166,6 +158,18 @@ export default function BookKeepingSubmissionPage() {
         </nav>
 
         <div className="mt-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+          {readOnly && (
+            <div
+              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+              role="status"
+              aria-live="polite"
+            >
+              <p className="font-semibold">Submission successful</p>
+              <p className="mt-1 text-sm">
+                Your book keeping data has been submitted. All fields are now read-only.
+              </p>
+            </div>
+          )}
           <SubmissionForm
             formData={formData}
             errors={errors}
@@ -187,8 +191,7 @@ export default function BookKeepingSubmissionPage() {
               <button
                 type="button"
                 onClick={handleSubmitClick}
-                disabled={!submitEnabled}
-                className="rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "#2563EB" }}
               >
                 Submit
@@ -196,11 +199,6 @@ export default function BookKeepingSubmissionPage() {
             </div>
           )}
 
-          {readOnly && (
-            <p className="mt-4 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-              Status: Submitted
-            </p>
-          )}
         </div>
       </div>
 
